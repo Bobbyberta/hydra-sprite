@@ -1,17 +1,83 @@
+#!/bin/bash
+
+# 🔄 Auto-update .cursorrules script for Hydra Sprite
+# This script updates .cursorrules with current project state
+
+set -e
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+# Get project statistics
+get_project_stats() {
+    local src_files=$(find src -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" 2>/dev/null | wc -l)
+    local total_files=$(find . -type f -not -path "./node_modules/*" -not -path "./.git/*" | wc -l)
+    local package_version=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
+    
+    echo "src_files:$src_files"
+    echo "total_files:$total_files"
+    echo "package_version:$package_version"
+    echo "last_updated:$(date '+%Y-%m-%d %H:%M:%S')"
+}
+
+# Get current dependencies
+get_dependencies() {
+    node -p "Object.keys(require('./package.json').dependencies || {}).join(', ')" 2>/dev/null || echo "No dependencies found"
+}
+
+# Get current dev dependencies
+get_dev_dependencies() {
+    node -p "Object.keys(require('./package.json').devDependencies || {}).join(', ')" 2>/dev/null || echo "No dev dependencies found"
+}
+
+# Update .cursorrules with current project state
+update_cursorrules() {
+    local stats=$(get_project_stats)
+    local src_files=$(echo "$stats" | grep "src_files:" | cut -d':' -f2)
+    local total_files=$(echo "$stats" | grep "total_files:" | cut -d':' -f2)
+    local package_version=$(echo "$stats" | grep "package_version:" | cut -d':' -f2)
+    local last_updated=$(echo "$stats" | grep "last_updated:" | cut -d':' -f2-)
+    
+    local dependencies=$(get_dependencies)
+    local dev_dependencies=$(get_dev_dependencies)
+    
+    # Check if git is available and get latest commit
+    local git_hash=""
+    if command -v git &> /dev/null; then
+        git_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    fi
+    
+    # Create updated .cursorrules
+    cat > .cursorrules << EOF
 # Hydra Sprite - React Native Water Tracking App
 
 ## Project Overview
 This is an offline water tracking mobile app built with React Native. Users log water intake to keep a virtual sprite character alive and healthy. The app supports Android and iOS platforms with a focus on privacy, security, and ease of development.
 
 ## Project Statistics (Auto-updated)
-- **Version**: 1.0.0
-- **Last Updated**: 2025-07-14 23:29:41
-- **Source Files**:        8
-- **Total Files**:     1262
-- **Git Commit**: 90ecfef
+- **Version**: $package_version
+- **Last Updated**: $last_updated
+- **Source Files**: $src_files
+- **Total Files**: $total_files
+- **Git Commit**: $git_hash
 
 ## Current Project Structure
-```
+\`\`\`
 hydra-sprite/
 ├── src/
 │   ├── components/         # Reusable UI components
@@ -34,11 +100,11 @@ hydra-sprite/
 ├── update-cursorrules.sh  # Auto-update this file
 ├── privacy-policy.html    # Privacy policy for app stores
 └── GOOGLE_PLAY_RELEASE_GUIDE.md # Complete release guide
-```
+\`\`\`
 
 ## Dependencies
-- **Production**: @react-native-async-storage/async-storage, date-fns, react, react-native, react-native-linear-gradient, react-native-svg, react-native-vector-icons
-- **Development**: @babel/core, @babel/preset-env, @babel/runtime, @react-native/eslint-config, @react-native/metro-config, @react-native/typescript-config, @types/react, @types/react-test-renderer, babel-jest, eslint, jest, metro-react-native-babel-preset, prettier, react-test-renderer, typescript
+- **Production**: $dependencies
+- **Development**: $dev_dependencies
 
 ## Development Guidelines
 
@@ -53,13 +119,13 @@ hydra-sprite/
 - Add proper JSDoc comments for functions and components
 
 ### File Structure Guidelines
-- `/src/components/` - Reusable UI components (Button, Input, Card, etc.)
-- `/src/screens/` - Screen components (HomeScreen, StatsScreen, etc.)
-- `/src/services/` - Business logic and data management
-- `/src/utils/` - Helper functions and utilities
-- `/src/types/` - TypeScript type definitions
-- `/src/assets/` - Images, fonts, and other static assets
-- `/src/store/` - State management (AsyncStorage utilities)
+- \`/src/components/\` - Reusable UI components (Button, Input, Card, etc.)
+- \`/src/screens/\` - Screen components (HomeScreen, StatsScreen, etc.)
+- \`/src/services/\` - Business logic and data management
+- \`/src/utils/\` - Helper functions and utilities
+- \`/src/types/\` - TypeScript type definitions
+- \`/src/assets/\` - Images, fonts, and other static assets
+- \`/src/store/\` - State management (AsyncStorage utilities)
 
 ### Mobile-Specific Guidelines
 - **Offline-First**: Always consider offline functionality first
@@ -88,10 +154,10 @@ hydra-sprite/
 
 ### Wireless Android Development
 - **Device Pairing**: Use ADB wireless debugging for development
-- **IP Configuration**: Store device IP in `.android-device-ip` (excluded from Git)
-- **Quick Testing**: Use `./test-app` for one-command deployment
-- **Debug Logs**: Use `./debug-logs.sh` for real-time debugging
-- **Setup Script**: Use `./setup-android-wireless.sh` for complete wireless setup
+- **IP Configuration**: Store device IP in \`.android-device-ip\` (excluded from Git)
+- **Quick Testing**: Use \`./test-app\` for one-command deployment
+- **Debug Logs**: Use \`./debug-logs.sh\` for real-time debugging
+- **Setup Script**: Use \`./setup-android-wireless.sh\` for complete wireless setup
 
 ### Security & Privacy Guidelines
 - **Privacy-First**: Store all data locally (offline-first)
@@ -103,15 +169,15 @@ hydra-sprite/
 - **Keystore Security**: Keep release keystores and passwords secure
 
 ### Development Scripts
-- **`./test-app`** - Quick app deployment and testing
-- **`./debug-logs.sh`** - Real-time debug log monitoring
-- **`./setup-android-wireless.sh`** - Complete wireless development setup
-- **`./release-android.sh`** - Automated release build process
-- **`./update-cursorrules.sh`** - Auto-update this file
-- **`npm start`** - Start Metro bundler
-- **`npm test`** - Run tests
-- **`npm run android`** - Run on Android (traditional USB)
-- **`npm run ios`** - Run on iOS
+- **\`./test-app\`** - Quick app deployment and testing
+- **\`./debug-logs.sh\`** - Real-time debug log monitoring
+- **\`./setup-android-wireless.sh\`** - Complete wireless development setup
+- **\`./release-android.sh\`** - Automated release build process
+- **\`./update-cursorrules.sh\`** - Auto-update this file
+- **\`npm start\`** - Start Metro bundler
+- **\`npm test\`** - Run tests
+- **\`npm run android\`** - Run on Android (traditional USB)
+- **\`npm run ios\`** - Run on iOS
 
 ### Code Quality
 - Write unit tests for utility functions
@@ -154,7 +220,7 @@ hydra-sprite/
 - Test release builds before publishing
 
 ### Release Process
-- **Production Build**: Use `./release-android.sh` for automated release builds
+- **Production Build**: Use \`./release-android.sh\` for automated release builds
 - **Keystore Management**: Generate and secure production keystore
 - **App Store Assets**: Prepare screenshots, descriptions, and privacy policy
 - **Google Play Store**: Follow Play Store guidelines and policies
@@ -184,23 +250,23 @@ hydra-sprite/
 - Clean, minimalist design approach
 
 ### Configuration Files
-- **`.android-device-ip`** - Your actual device IP (excluded from Git)
-- **`.android-device-ip.example`** - Template for device IP setup
-- **`android/gradle.properties`** - Release signing configuration (excluded from Git)
-- **`privacy-policy.html`** - Privacy policy for app stores
-- **`package.json`** - Project dependencies and scripts
-- **`tsconfig.json`** - TypeScript configuration
-- **`babel.config.js`** - Babel configuration
-- **`metro.config.js`** - Metro bundler configuration
-- **`jest.config.js`** - Jest testing configuration
+- **\`.android-device-ip\`** - Your actual device IP (excluded from Git)
+- **\`.android-device-ip.example\`** - Template for device IP setup
+- **\`android/gradle.properties\`** - Release signing configuration (excluded from Git)
+- **\`privacy-policy.html\`** - Privacy policy for app stores
+- **\`package.json\`** - Project dependencies and scripts
+- **\`tsconfig.json\`** - TypeScript configuration
+- **\`babel.config.js\`** - Babel configuration
+- **\`metro.config.js\`** - Metro bundler configuration
+- **\`jest.config.js\`** - Jest testing configuration
 
 ### Development Workflow
-1. **Start Development**: `./test-app` for quick testing
+1. **Start Development**: \`./test-app\` for quick testing
 2. **Make Changes**: Edit code with hot reload
-3. **Debug Issues**: Use `./debug-logs.sh` for real-time logs
+3. **Debug Issues**: Use \`./debug-logs.sh\` for real-time logs
 4. **Test Thoroughly**: Test on physical devices
 5. **Commit Changes**: Follow Git workflow guidelines
-6. **Release**: Use `./release-android.sh` for production builds
+6. **Release**: Use \`./release-android.sh\` for production builds
 
 ### Privacy & Store Compliance
 - **Privacy Policy**: Complete privacy policy included
@@ -242,7 +308,7 @@ hydra-sprite/
 - **Release Build**: For production deployment
 - **Keystore**: Secure production signing
 - **Bundle Format**: Use AAB for Play Store
-- **Version Management**: Semantic versioning (1.0.0)
+- **Version Management**: Semantic versioning ($package_version)
 - **Testing**: Thorough testing before release
 
 ### Environment Setup
@@ -258,10 +324,10 @@ hydra-sprite/
 - **Device Pairing**: DEVICE_PAIRING_GUIDE.md
 - **Wireless Setup**: WIRELESS_SETUP_USAGE.md
 - **Release Issues**: GOOGLE_PLAY_RELEASE_GUIDE.md
-- **Scripts Help**: Run scripts with `help` parameter
+- **Scripts Help**: Run scripts with \`help\` parameter
 
 ### Current App State
-- **Version**: 1.0.0
+- **Version**: $package_version
 - **Platform**: Android (iOS support ready)
 - **Architecture**: Single-screen water tracking
 - **Features**: Sprite character, water logging, daily goals
@@ -282,4 +348,26 @@ hydra-sprite/
 Remember: This is a privacy-focused, offline-first app. All development should prioritize user privacy and data security.
 
 ---
-*This file was automatically updated on 2025-07-14 23:29:41*
+*This file was automatically updated on $last_updated*
+EOF
+}
+
+# Main execution
+main() {
+    print_info "Updating .cursorrules with current project state..."
+    
+    # Check if we're in a React Native project
+    if [ ! -f "package.json" ]; then
+        print_warning "No package.json found. Make sure you're in the project root."
+        exit 1
+    fi
+    
+    # Update .cursorrules
+    update_cursorrules
+    
+    print_success ".cursorrules updated successfully!"
+    print_info "File includes current project statistics and dependencies"
+}
+
+# Run main function
+main "$@" 

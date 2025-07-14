@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# 📱 Hydra Sprite - Super Simple App Testing
-# Just run: ./test-app
+# 🚀 Quick test script for Hydra Sprite
+# This script provides one-command testing
 
-echo "🚀 Starting Hydra Sprite quick test..."
-./setup-android-wireless.sh test "$@" 
+# Update .cursorrules with current project state
+if [ -f "update-cursorrules.sh" ]; then
+    ./update-cursorrules.sh > /dev/null 2>&1
+fi
+
+# Run the main setup script in test mode
+./setup-android-wireless.sh test 

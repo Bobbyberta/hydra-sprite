@@ -35,6 +35,18 @@ print_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
+# Update .cursorrules with current project state
+update_cursorrules() {
+    print_info "Updating .cursorrules with current project state..."
+    
+    if [ -f "update-cursorrules.sh" ]; then
+        ./update-cursorrules.sh
+        print_success ".cursorrules updated"
+    else
+        print_warning "update-cursorrules.sh not found, skipping auto-update"
+    fi
+}
+
 # Check if gradle.properties exists
 check_gradle_properties() {
     if [ ! -f "android/gradle.properties" ]; then
@@ -196,6 +208,9 @@ show_summary() {
 main() {
     print_header "🚀 Hydra Sprite - Android Release Build"
     
+    # Update .cursorrules first
+    update_cursorrules
+    
     # Parse command line arguments
     case "${1:-all}" in
         "clean")
@@ -237,6 +252,8 @@ main() {
             echo "  $0              # Full release build"
             echo "  $0 aab          # Build AAB for Play Store"
             echo "  $0 test         # Install and test"
+            echo ""
+            echo "Note: .cursorrules is automatically updated on each build"
             exit 0
             ;;
         *)

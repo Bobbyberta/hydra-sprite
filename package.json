@@ -10,7 +10,10 @@
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "build:android": "cd android && ./gradlew assembleRelease",
-    "build:ios": "cd ios && xcodebuild -workspace HydraSprite.xcworkspace -scheme HydraSprite -configuration Release -archivePath HydraSprite.xcarchive archive"
+    "build:ios": "cd ios && xcodebuild -workspace HydraSprite.xcworkspace -scheme HydraSprite -configuration Release -archivePath HydraSprite.xcarchive archive",
+    "release:android": "./release-android.sh",
+    "update:cursorrules": "./update-cursorrules.sh",
+    "test:app": "./test-app"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.19.5",
