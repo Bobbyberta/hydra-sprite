@@ -1,27 +1,24 @@
-# 📱 Wireless Android Setup Script Usage Guide
+# 📱 Wireless Android Setup Guide
+*Complete guide for running Hydra Sprite on Android devices without USB cables*
 
 ## 🚀 Quick Start
 
-Your `setup-android-wireless.sh` script handles everything automatically! Here's how to use it:
-
-### **First Time Setup (Complete)**
+### **First Time Setup (Recommended)**
 ```bash
-# Run everything: setup environment + connect device + run app
-./setup-android-wireless.sh
-# or
+# Complete setup: environment + device pairing + app deployment
 ./setup-android-wireless.sh full
 ```
 
 ### **Individual Commands**
 ```bash
-# Just setup development environment (one-time)
+# Setup development environment only
 ./setup-android-wireless.sh setup
 
-# Just connect and run app (after setup is done)
-./setup-android-wireless.sh run
-
-# Just connect to device wirelessly
+# Pair and connect to device
 ./setup-android-wireless.sh connect
+
+# Build and run app (after connection)
+./setup-android-wireless.sh run
 
 # Disconnect from device
 ./setup-android-wireless.sh disconnect
@@ -29,204 +26,283 @@ Your `setup-android-wireless.sh` script handles everything automatically! Here's
 
 ---
 
-## 📋 What the Script Does
+## 📋 Complete Setup Process
 
-### ✅ **Setup Phase:**
-- Checks for macOS compatibility
-- Installs Java JDK 17 (if needed)
-- Sets up Android SDK environment variables
-- Installs Android SDK components
-- Installs React Native dependencies
-- Configures your development environment
+### **Step 1: Environment Setup**
+The script automatically handles:
+- ✅ Java JDK 17 installation
+- ✅ Android SDK components
+- ✅ Environment variables
+- ✅ React Native dependencies
+- ✅ Android platform folders setup
 
-### 📱 **Connection Phase:**
-- Guides you through finding your device IP
-- Connects to your Android device wirelessly
-- Saves connection info for future use
-- Enables you to disconnect USB cable
+### **Step 2: Device Preparation**
 
-### 🚀 **Run Phase:**
-- Starts Metro bundler in background
-- Builds and installs Hydra Sprite on your device
-- Launches the app wirelessly
+#### **Enable Developer Options (One-time)**
+1. **Settings** → **About phone** 
+2. Tap **"Build number"** 7 times
+3. You'll see **"You are now a developer!"**
+
+#### **Enable Wireless Debugging (Android 11+)**
+1. **Settings** → **Developer options**
+2. Turn on **"Wireless debugging"**
+3. Keep this screen open for pairing
+
+### **Step 3: Device Pairing Process**
+
+#### **🔄 Two-Step Connection Process:**
+
+**📱 On Your Android Device:**
+1. In **Developer options** → **Wireless debugging**
+2. Tap **"Pair device with pairing code"**
+3. Note the **6-digit pairing code** and **IP:PORT** shown
+
+**💻 On Your Mac:**
+1. Run the pairing command:
+   ```bash
+   adb pair [PAIRING_IP:PAIRING_PORT]
+   ```
+2. Enter the **6-digit code** when prompted
+3. You should see **"Successfully paired"**
+
+**🔗 Connect for Development:**
+1. Back in **Wireless debugging** main screen, note the **IP:PORT**
+2. Connect using:
+   ```bash
+   adb connect [DEVICE_IP:CONNECTION_PORT]
+   ```
+
+#### **📝 Example Session:**
+```bash
+# Device shows: "Pair device with pairing code"
+# IP: 100.100.1.100:10000, Code: 123456
+$ adb pair 100.100.1.100:10000
+Enter pairing code: 123456
+Successfully paired to 100.100.1.100:10000
+
+# Device shows: "Wireless debugging" main screen
+# IP: 100.100.1.100:10000
+$ adb connect 100.100.1.100:10000
+connected to 100.100.1.100:10000
+
+# Verify connection
+$ adb devices
+List of devices attached
+100.100.1.100:10000    device
+```
+
+### **Step 4: Run the App**
+```bash
+# Deploy to connected device
+npx react-native run-android
+```
 
 ---
 
-## 📱 Android Device Preparation
+## 🎯 Automated Script Usage
 
-**Before running the script, prepare your Android device:**
-
-1. **Enable Developer Options:**
-   - Go to Settings → About Phone
-   - Tap "Build Number" 7 times
-   - Developer Options will appear in Settings
-
-2. **Enable USB Debugging:**
-   - Go to Settings → Developer Options
-   - Turn on "USB Debugging"
-   - Turn on "Wireless Debugging" (Android 11+)
-
-3. **Connect USB Initially:**
-   - Connect your device via USB cable
-   - Accept the debugging authorization popup
-
-4. **Find Your IP Address:**
-   - Settings → About Phone → Status → IP Address
-   - Or Settings → Wi-Fi → [Your Network] → Advanced
-
----
-
-## 🔄 Daily Development Workflow
-
-### **First Time (Complete Setup):**
+### **Complete First-Time Setup:**
 ```bash
-./setup-android-wireless.sh
-```
-
-### **Subsequent Runs:**
-```bash
-# Quick connect and run (script remembers your device IP)
-./setup-android-wireless.sh run
-```
-
-### **If Connection Lost:**
-```bash
-# Reconnect to your device
-./setup-android-wireless.sh connect
-```
-
----
-
-## 🎯 Example Usage Session
-
-```bash
-# First time setup
 $ ./setup-android-wireless.sh
 
 🚀 Hydra Sprite Android Wireless Setup
 ========================================
 
-[INFO] Homebrew found
-[INFO] Installing Java JDK 17...
-[SUCCESS] Java is already installed
-[INFO] Adding Android environment variables to ~/.zshrc
-[INFO] Installing Android SDK components...
-[SUCCESS] Android SDK components installed
-[SUCCESS] Node.js found: v18.17.0
-[SUCCESS] npm found: 9.6.7
-[INFO] Installing npm dependencies...
+✅ Environment Setup:
+[SUCCESS] Java JDK 17 installed
+[SUCCESS] Android SDK configured
 [SUCCESS] Dependencies installed
-✅ Environment setup complete!
+[SUCCESS] Platform folders ready
 
-📱 Android Device Connection Setup
+📱 Device Pairing Instructions:
 ========================================
 
-📱 Please ensure your Android device is connected via USB first
-📱 Make sure USB Debugging is enabled in Developer Options
+Please complete these steps on your Android device:
 
-[INFO] Checking for connected devices...
-[INFO] Connected devices:
-List of devices attached
-1A2B3C4D5E	device
+1. Enable Developer Options:
+   • Settings → About phone
+   • Tap "Build number" 7 times
 
-📱 To find your device's IP address:
-1. Go to Settings > About Phone > Status
-2. Look for 'IP Address' or 'Wi-Fi IP Address'
-3. Or go to Settings > Wi-Fi > Connected Network > Advanced
+2. Enable Wireless Debugging:
+   • Settings → Developer options
+   • Turn on "Wireless debugging"
 
-Enter your Android device's IP address: 192.168.1.100
+3. Pair Your Device:
+   • Tap "Pair device with pairing code"
+   • Note the IP:PORT and 6-digit code
 
-[INFO] Enabling TCP/IP mode on port 5555...
-[INFO] Connecting to device wirelessly at 192.168.1.100:5555...
-[SUCCESS] Successfully connected wirelessly to 192.168.1.100:5555
+Press Enter when ready to pair...
 
-🔌 You can now disconnect the USB cable!
+[PAIRING] Please run: adb pair [YOUR_PAIRING_IP:PORT]
+[PAIRING] Enter the 6-digit code when prompted
 
-[INFO] Starting Metro bundler in background...
-[SUCCESS] Metro bundler started (PID: 12345)
-[INFO] Building and installing app on device...
-[SUCCESS] 🎉 Hydra Sprite is now running on your device!
-
-🌟 Your water tracking sprite is ready to help you stay hydrated!
-
-Next steps:
-• Shake your device to open the React Native debug menu
-• Press 'j' in this terminal to open React DevTools
-• Start logging water to keep your sprite happy!
+Connection established! 🎉
+[SUCCESS] Device connected wirelessly
+[SUCCESS] App deployed successfully
+[SUCCESS] Hydra Sprite is running on your device!
 ```
 
 ---
 
-## 🐛 Troubleshooting
+## 🔧 Troubleshooting & Error Handling
 
-### **Script Won't Run:**
+### **🚨 Common Issues & Solutions**
+
+#### **"adb: command not found"**
 ```bash
-# Make sure it's executable
-chmod +x setup-android-wireless.sh
+# Reload environment variables
+source ~/.zshrc
+
+# Verify installation
+adb --version
 ```
 
-### **Device Not Found:**
+#### **"No devices/emulators found"**
 ```bash
-# Check USB connection first
+# Check device connection
 adb devices
 
-# Restart adb if needed
-adb kill-server
-adb start-server
+# If empty, ensure:
+• Device has Developer Options enabled
+• Wireless debugging is ON
+• Device and Mac are on same WiFi network
 ```
 
-### **Wireless Connection Lost:**
+#### **"Pairing failed" or "Connection refused"**
 ```bash
-# Reconnect using saved IP
+# Reset wireless debugging
+• Turn OFF wireless debugging
+• Turn ON wireless debugging
+• Generate new pairing code
+• Try pairing again
+
+# Check network connectivity
+ping [DEVICE_IP]
+```
+
+#### **"Android project not found"**
+```bash
+# The script handles this automatically by:
+# 1. Creating temporary React Native project
+# 2. Copying android/ and ios/ folders
+# 3. Updating configuration files
+# 4. Setting correct app name
+
+# Manual fix if needed:
+npx @react-native-community/cli@latest init TempProject --skip-install
+cp -r TempProject/android ./
+cp -r TempProject/ios ./
+rm -rf TempProject
+```
+
+#### **"Build failed" or Gradle errors**
+```bash
+# Clear caches
+npm start -- --reset-cache
+cd android && ./gradlew clean && cd ..
+
+# Restart Metro
+npm start
+```
+
+#### **"Metro server already running"**
+```bash
+# Kill existing Metro
+npx react-native start --reset-cache
+# or
+lsof -ti:8081 | xargs kill -9
+```
+
+### **🔍 Advanced Debugging**
+
+#### **Check Connection Status:**
+```bash
+# List connected devices
+adb devices -l
+
+# Check device details
+adb shell getprop ro.product.model
+adb shell ip route | grep wlan
+```
+
+#### **Network Troubleshooting:**
+```bash
+# Check same network
+# Mac IP:
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Device IP should have similar prefix (e.g., 100.100.1.100)
+```
+
+#### **Build Diagnostics:**
+```bash
+# Verbose build output
+npx react-native run-android --verbose
+
+# Check Android logs
+adb logcat | grep -E "(ReactNative|HydraSprite)"
+```
+```
+
+---
+
+## ✅ Success Indicators
+
+**🎉 You're Ready When:**
+- ✅ `adb devices` shows your device connected
+- ✅ USB cable can be disconnected
+- ✅ App launches on Android device
+- ✅ You can shake device for debug menu
+- ✅ Water logging buttons work in app
+- ✅ Sprite responds to water intake
+
+**📁 Files Created:**
+- `.android-device-ip` - Saved connection info
+- `android/` - Android platform project
+- `ios/` - iOS platform project (for future use)
+
+---
+
+## 💡 Development Workflow
+
+### **Daily Development:**
+```bash
+# Quick connect (if device IP saved)
 ./setup-android-wireless.sh connect
 
-# Or manually reconnect
-adb connect YOUR_DEVICE_IP:5555
+# Run app
+./setup-android-wireless.sh run
 ```
 
-### **App Won't Install:**
+### **Code Changes:**
 ```bash
-# Clear Metro cache
-npm start -- --reset-cache
+# Auto-reload is enabled
+# Just save your files and see changes instantly!
 
-# Clean build
-cd android && ./gradlew clean && cd ..
+# For major changes, rebuild:
+npx react-native run-android
+```
+
+### **Testing & Debugging:**
+```bash
+# Open debug menu: Shake device
+# Enable Fast Refresh: Cmd+R or Debug menu
+# Inspect element: Debug menu → "Toggle Inspector"
+# Remote debugging: Debug menu → "Open React DevTools"
 ```
 
 ---
 
-## 📁 Generated Files
+## 🚀 Next Steps
 
-The script creates these files for convenience:
-
-- **`.android-device-ip`** - Saves your device IP for quick reconnection
-- **`~/.zshrc`** - Updated with Android environment variables
-
----
-
-## 🎉 Success Indicators
-
-**✅ Setup Complete When You See:**
-- "Environment setup complete!"
-- "Successfully connected wirelessly"
-- "Hydra Sprite is now running on your device!"
-
-**✅ You're Ready When:**
-- USB cable is disconnected
-- App launches on your Android device
-- You can shake device to see React Native debug menu
-- Water logging buttons work in the app
+1. **Start developing:** Edit files in `src/` directory
+2. **Test features:** Log water intake, check sprite animations
+3. **Debug:** Use React DevTools and device debugging
+4. **Deploy:** Follow Google Play Store publishing guide
+5. **Iterate:** Use wireless development for rapid testing
 
 ---
 
-## 💡 Pro Tips
+*Your Hydra Sprite app is now ready for wireless development! 🌊📱✨*
 
-1. **Save Time:** After first setup, just use `./setup-android-wireless.sh run`
-2. **Multiple Devices:** Script can connect to different devices by IP
-3. **Debug Mode:** Shake device → "Open React DevTools" for debugging
-4. **Performance:** Test with `npm run android -- --variant=release`
-5. **Updates:** When you update app code, just run the script again
-
----
-
-*Your Hydra Sprite app is now ready for wireless development! 💧📱✨* 
+**Need help?** Check the [Android Development Guide](./ANDROID_DEVELOPMENT_GUIDE.md) for detailed setup instructions. 

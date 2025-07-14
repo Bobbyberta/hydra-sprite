@@ -1,0 +1,7 @@
+# Android Device IP Configuration
+# Copy this file to .android-device-ip and replace with your actual device IP
+# This file is excluded from Git for security
+
+# Format: IP_ADDRESS:PORT
+# Example: 100.100.1.100:10000
+YOUR_DEVICE_IP:12345

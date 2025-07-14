@@ -5,11 +5,12 @@
 
 - [🎯 Overview](#-overview)
 - [📦 Minimal Android SDK Setup](#-minimal-android-sdk-setup)
-- [📱 Wireless Development Setup](#-wireless-development-setup)
-- [🚀 Publishing to Google Play Store](#-publishing-to-google-play-store)
-- [📋 Complete Development Workflow](#-complete-development-workflow)
-- [💡 Pro Tips](#-pro-tips)
-- [🐛 Troubleshooting](#-troubleshooting)
+- [📱 Modern Wireless Development Setup](#-modern-wireless-development-setup)
+- [🔧 Device Pairing Process](#-device-pairing-process)
+- [🚀 Building and Running Apps](#-building-and-running-apps)
+- [📊 Publishing to Google Play Store](#-publishing-to-google-play-store)
+- [💡 Pro Tips & Workflows](#-pro-tips--workflows)
+- [🐛 Comprehensive Troubleshooting](#-comprehensive-troubleshooting)
 
 ---
 
@@ -20,176 +21,251 @@ This guide covers the **minimal setup** required to develop and publish React Na
 ### What You Need vs Don't Need
 
 **✅ Required:**
-- Android SDK (command line tools)
+- Android SDK (command line tools only)
 - Android platform tools  
-- Java Development Kit
-- Node.js & React Native CLI
-- Physical Android device
-- WiFi network
+- Java Development Kit 17+
+- Node.js 16+ & React Native CLI
+- Physical Android device with Android 11+
+- WiFi network (same for Mac and device)
 - Google Play Console account ($25 one-time fee)
 
 **❌ NOT Required:**
 - Android Studio IDE (just need SDK)
 - Android emulators
 - Xcode or iOS tools
-- Physical USB cables (after initial setup)
+- Physical USB cables (after initial pairing)
+- Windows or Linux setup
 
 ---
 
 ## 📦 Minimal Android SDK Setup
 
-### Option 1: Command Line Tools Only (Minimal)
+### Option 1: Automated Setup (Recommended)
 
+```bash
+# Use our enhanced setup script
+./setup-android-wireless.sh setup
+```
+
+### Option 2: Manual Installation
+
+#### Step 1: Install Prerequisites
 ```bash
 # Install Homebrew if not already installed
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Install Java JDK
+# Install Java JDK 17
 brew install --cask zulu@17
 
+# Verify Java installation
+java -version
+```
+
+#### Step 2: Download Android SDK
+```bash
 # Create Android SDK directory
-mkdir -p ~/android-sdk/cmdline-tools
-cd ~/android-sdk/cmdline-tools
+mkdir -p ~/android-sdk
 
-# Download Android command line tools (using curl, which is pre-installed on macOS)
-curl -O https://dl.google.com/android/repository/commandlinetools-mac-10406996_latest.zip
-unzip commandlinetools-mac-*_latest.zip
-mv cmdline-tools latest
+# Download command line tools
+cd ~/android-sdk
+curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip
 
-# Set up environment variables
+# Extract and organize
+unzip cmdline-tools.zip
+mkdir -p cmdline-tools/latest
+mv cmdline-tools/* cmdline-tools/latest/
+rm cmdline-tools.zip
+```
+
+#### Step 3: Setup Environment Variables
+```bash
+# Add to ~/.zshrc or ~/.bashrc
 echo 'export ANDROID_HOME=$HOME/android-sdk' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> ~/.zshrc
-echo 'export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home' >> ~/.zshrc
+echo 'export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin' >> ~/.zshrc
 
 # Reload shell configuration
 source ~/.zshrc
+```
 
-# Install required SDK components
+#### Step 4: Install SDK Components
+```bash
+# Accept licenses and install components
+yes | sdkmanager --licenses
 sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 ```
 
-### Option 2: Install Android Studio but Skip IDE (Recommended)
+---
 
+## 📱 Modern Wireless Development Setup
+
+### Android 11+ Wireless Debugging (Recommended)
+
+This is the modern, secure method that doesn't require USB cable for daily development.
+
+#### Prerequisites Check
 ```bash
-# Install Android Studio (we'll only use it for SDK management)
-brew install --cask android-studio
-
-# Set up environment variables
-echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> ~/.zshrc
-echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> ~/.zshrc
-echo 'export JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home' >> ~/.zshrc
-
-# Reload shell configuration
-source ~/.zshrc
-```
-
-### Verify Installation
-
-```bash
-# Check Java installation
+# Verify installation
+adb --version
 java -version
+node --version
 
-# Check Android SDK
-adb version
-
-# Check environment variables
-echo $ANDROID_HOME
-echo $JAVA_HOME
+# Should see:
+# Android Debug Bridge version 1.0.41
+# openjdk version "17.x.x"
+# v16.x.x or higher
 ```
 
 ---
 
-## 📱 Wireless Development Setup
+## 🔧 Device Pairing Process
 
-### Enable Developer Options on Android Device
+### Step 1: Enable Developer Options (One-time)
 
-1. Go to **Settings** → **About Phone**
-2. Tap **Build Number** 7 times
-3. Go back to **Settings** → **Developer Options**
-4. Enable **USB Debugging**
-5. Enable **Wireless Debugging** (Android 11+)
+**On your Android device:**
+1. **Settings** → **About phone**
+2. Tap **"Build number"** 7 times rapidly
+3. You'll see **"You are now a developer!"**
+4. **Settings** → **Developer options** (now visible)
 
-### Set Up Wireless Connection
+### Step 2: Enable Wireless Debugging
 
+**On your Android device:**
+1. **Settings** → **Developer options**
+2. Toggle **"Wireless debugging"** ON
+3. Keep this screen open for pairing
+
+### Step 3: Two-Part Connection Process
+
+#### 🔗 Part A: Initial Pairing (One-time per device)
+
+**📱 On your Android device:**
+1. In **"Wireless debugging"** screen
+2. Tap **"Pair device with pairing code"**
+3. Note the **IP:PORT** and **6-digit code** displayed
+
+**💻 On your Mac:**
 ```bash
-# 1. Connect device via USB initially
-adb devices
-
-# 2. Enable TCP/IP mode on port 5555
-adb tcpip 5555
-
-# 3. Find your device's IP address
-# Android: Settings > About Phone > Status > IP Address
-# Or use: adb shell ip route
-
-# 4. Connect wirelessly (replace with your device IP)
-adb connect 192.168.1.100:5555
-
-# 5. Verify wireless connection
-adb devices
-# Should show: 192.168.1.100:5555 device
-
-# 6. Disconnect USB cable - you're now wireless!
+# Use the pairing IP:PORT from your device
+adb pair 100.100.1.100:10000
+# Enter the 6-digit code when prompted
 ```
 
-### Run Your App Wirelessly
+**Expected output:**
+```
+Enter pairing code: 123456
+Successfully paired to 100.100.1.100:10000
+```
+
+#### 🔌 Part B: Connection for Development
+
+**📱 On your Android device:**
+1. Go back to main **"Wireless debugging"** screen
+2. Note the **IP:PORT** displayed (different from pairing port)
+
+**💻 On your Mac:**
+```bash
+# Use the connection IP:PORT from main screen
+adb connect 100.100.1.100:10000
+```
+
+**Expected output:**
+```
+connected to 100.100.1.100:10000
+```
+
+#### ✅ Verify Connection
+```bash
+adb devices
+# Should show:
+# List of devices attached
+# 100.100.1.100:10000    device
+```
+
+### Step 4: Save Connection Info
+```bash
+# Save IP for future use
+echo "100.100.1.100:10000" > .android-device-ip
+
+# Quick reconnect in the future
+adb connect $(cat .android-device-ip)
+```
+
+---
+
+## 🚀 Building and Running Apps
+
+### Setup React Native Project Structure
+
+If you're starting fresh or missing platform folders:
 
 ```bash
-# Navigate to your project
-cd hydra-sprite
+# Our script handles this automatically, but manual process:
+npx @react-native-community/cli@latest init TempProject --skip-install
+cp -r TempProject/android ./
+cp -r TempProject/ios ./
+rm -rf TempProject
 
-# Start Metro bundler
+# Update configuration for your app
+# (See script for detailed configuration updates)
+```
+
+### Build and Deploy
+
+```bash
+# Build and install on connected device
+npx react-native run-android
+
+# First build takes 3-5 minutes
+# Subsequent builds: 30-60 seconds
+```
+
+### Development Workflow
+
+```bash
+# Start development server (if not auto-started)
 npm start
 
-# Run on wirelessly connected device
-npm run android
-```
+# Build variants
+npx react-native run-android --variant=debug    # Development
+npx react-native run-android --variant=release  # Production testing
 
-### Reconnect After Device Restart
-
-```bash
-# If device restarts, quickly reconnect
-adb connect YOUR_DEVICE_IP:5555
+# Clear cache if needed
+npm start -- --reset-cache
 ```
 
 ---
 
-## 🚀 Publishing to Google Play Store
+## 📊 Publishing to Google Play Store
 
-### Step 1: Generate Release Signing Key
+### Step 1: Generate Release APK
 
 ```bash
-# Navigate to your project
-cd hydra-sprite
+# Navigate to android directory
+cd android
 
-# Generate a keystore file (KEEP THIS SAFE!)
-keytool -genkeypair -v -storetype PKCS12 \
-  -keystore hydra-sprite-release-key.keystore \
-  -alias hydra-sprite-key-alias \
-  -keyalg RSA -keysize 2048 -validity 10000
+# Generate release APK
+./gradlew assembleRelease
 
-# You'll be prompted for passwords - remember them!
-# Store the keystore file in a secure location
+# APK location:
+# android/app/build/outputs/apk/release/app-release.apk
 ```
 
-**⚠️ IMPORTANT:** Back up your keystore file and passwords! You need them for ALL future app updates.
+### Step 2: Generate Signed APK (Required for Play Store)
 
-### Step 2: Configure Release Build
+```bash
+# Generate keystore (one-time)
+keytool -genkey -v -keystore hydra-sprite-release-key.keystore -alias hydra-sprite -keyalg RSA -keysize 2048 -validity 10000
 
-Create `android/gradle.properties`:
-```properties
-MYAPP_RELEASE_STORE_FILE=hydra-sprite-release-key.keystore
-MYAPP_RELEASE_KEY_ALIAS=hydra-sprite-key-alias
-MYAPP_RELEASE_STORE_PASSWORD=your_store_password
-MYAPP_RELEASE_KEY_PASSWORD=your_key_password
+# Add to android/gradle.properties
+echo "MYAPP_RELEASE_STORE_FILE=hydra-sprite-release-key.keystore" >> gradle.properties
+echo "MYAPP_RELEASE_KEY_ALIAS=hydra-sprite" >> gradle.properties
+echo "MYAPP_RELEASE_STORE_PASSWORD=your_store_password" >> gradle.properties
+echo "MYAPP_RELEASE_KEY_PASSWORD=your_key_password" >> gradle.properties
 ```
 
-Update `android/app/build.gradle`:
+**Update android/app/build.gradle:**
 ```gradle
 android {
-    ...
     signingConfigs {
         release {
             if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
@@ -202,230 +278,288 @@ android {
     }
     buildTypes {
         release {
-            ...
             signingConfig signingConfigs.release
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // ... other config
         }
     }
 }
 ```
 
-### Step 3: Build Release Files
+### Step 3: Generate App Bundle (Recommended)
 
 ```bash
-# Build release APK (for testing)
-cd android
-./gradlew assembleRelease
-
-# APK location: android/app/build/outputs/apk/release/app-release.apk
-
-# Build App Bundle (for Play Store - recommended)
+# Generate AAB file for Play Store
 ./gradlew bundleRelease
 
-# AAB location: android/app/build/outputs/bundle/release/app-release.aab
+# Bundle location:
+# android/app/build/outputs/bundle/release/app-release.aab
 ```
 
-### Step 4: Upload to Google Play Store
+### Step 4: Upload to Google Play Console
 
-1. Go to [Google Play Console](https://play.google.com/console)
-2. Create new app
-3. Complete store listing (description, screenshots, etc.)
-4. Upload the `.aab` file from `android/app/build/outputs/bundle/release/`
-5. Complete content rating and pricing
-6. Submit for review
+1. **Create Google Play Console account** ($25 one-time fee)
+2. **Create new application**
+3. **Upload app-release.aab**
+4. **Fill out store listing:**
+   - App name: "Hydra Sprite"
+   - Short description: "Water tracking with virtual sprite companion"
+   - Full description: Include features and benefits
+   - Screenshots: Take from your device (required)
+   - Feature graphic: 1024x500px banner
+5. **Set pricing** (Free recommended for start)
+6. **Review and publish**
 
 ---
 
-## 📋 Complete Development Workflow
+## 💡 Pro Tips & Workflows
 
-### Daily Development
-
-```bash
-# 1. Start development server
-npm start
-
-# 2. Connect to device wirelessly (if needed)
-adb connect YOUR_DEVICE_IP:5555
-
-# 3. Run app on device
-npm run android
-
-# 4. Debug wirelessly
-# Shake device → Dev Menu → Open React DevTools
-```
-
-### Testing Builds
+### Daily Development Routine
 
 ```bash
-# Test release build performance
-npm run android -- --variant=release
+# Morning startup
+./setup-android-wireless.sh connect  # Quick device connection
+./setup-android-wireless.sh run      # Deploy latest code
 
-# Install specific APK
-adb install android/app/build/outputs/apk/release/app-release.apk
+# During development
+# Files auto-reload via Fast Refresh
+# Shake device for debug menu if needed
 
-# Clear app data for fresh testing
-adb shell pm clear com.hydrasprite
+# Testing new features
+npm start -- --reset-cache           # Clear Metro cache
+npx react-native run-android         # Full rebuild
 ```
-
-### Version Updates
-
-```bash
-# 1. Update version in android/app/build.gradle
-android {
-    defaultConfig {
-        versionCode 2
-        versionName "1.1.0"
-    }
-}
-
-# 2. Build new release
-cd android && ./gradlew bundleRelease
-
-# 3. Upload to Google Play Console
-```
-
----
-
-## 💡 Pro Tips
 
 ### Performance Optimization
 
 ```bash
-# Enable fast refresh for development
-echo 'export FAST_REFRESH=true' >> ~/.zshrc
+# Test release performance
+npx react-native run-android --variant=release
 
-# Test with Hermes engine (already enabled in RN 0.75+)
-# Check android/app/build.gradle:
-# enableHermes: true
+# Bundle size analysis
+npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/build/outputs/bundle.js --assets-dest android/app/build/outputs/res/
 
-# Monitor app performance
-adb shell dumpsys meminfo com.hydrasprite
+# Check APK size
+ls -lh android/app/build/outputs/apk/release/
 ```
 
-### Device Management
+### Debug and Monitoring
 
 ```bash
-# List all connected devices
-adb devices
+# Real-time Android logs
+adb logcat | grep -E "(ReactNative|HydraSprite|chromium)"
 
-# Connect multiple devices
-adb connect 192.168.1.100:5555
-adb connect 192.168.1.101:5555
+# React Native debug menu (shake device or):
+adb shell input keyevent 82
 
-# Run on specific device
-adb -s 192.168.1.100:5555 install app-release.apk
-```
-
-### Debugging Without IDE
-
-```bash
-# View React Native logs
-adb logcat | grep "ReactNativeJS"
-
-# View all app logs
-adb logcat | grep "hydrasprite"
-
-# Monitor device resources
-adb shell top | grep com.hydrasprite
-
-# Take screenshots
-adb shell screencap -p > screenshot.png
-```
-
-### Build Optimization
-
-```bash
-# Clean builds when having issues
-cd android && ./gradlew clean
-
-# Build with specific architecture (smaller APK)
-./gradlew assembleRelease -PTargetABI=arm64-v8a
-
-# Analyze bundle size
-./gradlew bundleRelease --scan
+# Device info
+adb shell getprop ro.product.model
+adb shell getprop ro.build.version.release
 ```
 
 ---
 
-## 🐛 Troubleshooting
+## 🐛 Comprehensive Troubleshooting
 
-### Common Issues
+### Connection Issues
 
-**Metro bundler won't start:**
+#### "adb: command not found"
 ```bash
-npx react-native start --reset-cache
-npm start -- --reset-cache
+# Environment not loaded
+source ~/.zshrc
+
+# Verify Android SDK path
+echo $ANDROID_HOME
+ls $ANDROID_HOME/platform-tools/adb
 ```
 
-**Device connection lost:**
+#### "No devices/emulators found"
 ```bash
-# Restart ADB
-adb kill-server
-adb start-server
+# Check basic connection
+adb devices
 
-# Reconnect wirelessly
-adb connect YOUR_DEVICE_IP:5555
+# If empty:
+# 1. Ensure device and Mac on same WiFi
+# 2. Restart wireless debugging on device
+# 3. Generate new pairing code
+# 4. Check firewall settings
 ```
 
-**Build failures:**
+#### "Connection refused" or "Offline"
 ```bash
-# Clean everything
+# Reset wireless debugging
+# On device: Turn OFF wireless debugging, then ON
+# Generate new pairing code
+
+# Network troubleshooting
+ping [DEVICE_IP]                    # Test basic connectivity
+adb kill-server && adb start-server # Restart ADB
+
+# Check network configuration
+ifconfig | grep "inet "             # Mac IP
+adb shell ip route | grep wlan      # Device IP
+```
+
+### Build Issues
+
+#### "Android project not found"
+```bash
+# Platform folders missing
+./setup-android-wireless.sh setup  # Automated fix
+
+# Manual fix:
+npx @react-native-community/cli@latest init TempProject --skip-install
+cp -r TempProject/android ./
+rm -rf TempProject
+```
+
+#### "Package name conflicts"
+```bash
+# Update package name in:
+# android/app/src/main/AndroidManifest.xml
+# android/app/build.gradle
+# android/app/src/main/java/com/*/MainActivity.kt
+
+# Check current package name
+grep -r "package com\." android/app/src/main/java/
+```
+
+#### "Gradle build failed"
+```bash
+# Clean build
 cd android && ./gradlew clean && cd ..
-rm -rf node_modules && npm install
 
-# Reset Metro cache
-npx react-native start --reset-cache
+# Clear all caches
+rm -rf node_modules
+npm install
+npm start -- --reset-cache
+
+# Check Gradle version compatibility
+cd android && ./gradlew --version
 ```
 
-**Signing errors:**
+#### "Metro bundler issues"
+```bash
+# Kill existing Metro
+lsof -ti:8081 | xargs kill -9
+
+# Clear Metro cache
+npx react-native start --reset-cache
+
+# Clear React Native cache
+npx react-native start --reset-cache --verbose
+```
+
+### Runtime Issues
+
+#### "App crashes on startup"
+```bash
+# Check Android logs
+adb logcat | grep -E "(AndroidRuntime|ReactNative)"
+
+# Check JavaScript errors
+adb logcat | grep -E "(ReactNativeJS|chromium)"
+
+# Verify correct main component name
+grep -r "registerComponent" index.js
+grep -r "getMainComponentName" android/app/src/main/java/
+```
+
+#### "Cannot connect to development server"
+```bash
+# Check Metro server
+curl http://localhost:8081/status
+
+# Device network access
+adb shell ping 8.8.8.8              # Internet connectivity
+adb reverse tcp:8081 tcp:8081       # Port forwarding
+
+# Alternative: Use device IP for Metro
+npm start -- --host 0.0.0.0
+```
+
+### Performance Issues
+
+#### "Slow build times"
+```bash
+# Enable Gradle daemon
+echo "org.gradle.daemon=true" >> android/gradle.properties
+
+# Parallel builds
+echo "org.gradle.parallel=true" >> android/gradle.properties
+
+# More memory for Gradle
+echo "org.gradle.jvmargs=-Xmx4g -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> android/gradle.properties
+```
+
+#### "App runs slowly on device"
+```bash
+# Test release build
+npx react-native run-android --variant=release
+
+# Enable Hermes (if not already)
+# In android/app/build.gradle:
+# project.ext.react = [
+#     enableHermes: true
+# ]
+```
+
+### Network & Firewall Issues
+
+#### "Cannot pair device"
+```bash
+# Check same network
+# Mac IP range:
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Device should have similar IP range (e.g., 100.100.1.100)
+
+# Disable VPN temporarily
+# Check macOS firewall settings
+# System Preferences → Security & Privacy → Firewall
+```
+
+#### "Pairing works but connection fails"
+```bash
+# Two different ports are normal:
+# - Pairing port (e.g., :37045) - one-time use
+# - Connection port (e.g., :33515) - for development
+
+# Use connection port for development
+adb connect [DEVICE_IP:CONNECTION_PORT]
+```
+
+### Google Play Store Issues
+
+#### "Upload failed"
+```bash
+# Generate fresh signed bundle
+cd android
+./gradlew clean
+./gradlew bundleRelease
+
+# Check bundle size (<150MB limit)
+ls -lh app/build/outputs/bundle/release/
+```
+
+#### "Signature verification failed"
 ```bash
 # Verify keystore
 keytool -list -v -keystore hydra-sprite-release-key.keystore
 
-# Check gradle.properties paths
-cat android/gradle.properties
-```
-
-### Environment Verification
-
-```bash
-# Check all required tools
-node --version
-npm --version
-java -version
-adb version
-
-# Verify environment variables
-echo $ANDROID_HOME
-echo $JAVA_HOME
-echo $PATH | grep android
-```
-
-### Device Debugging
-
-```bash
-# Check device info
-adb shell getprop ro.build.version.release  # Android version
-adb shell getprop ro.product.cpu.abi        # Architecture
-adb shell pm list packages | grep hydra     # Installed app
-
-# Force stop app
-adb shell am force-stop com.hydrasprite
-
-# Launch app manually
-adb shell am start -n com.hydrasprite/.MainActivity
+# Re-sign APK if needed
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore hydra-sprite-release-key.keystore app-release.apk hydra-sprite
 ```
 
 ---
 
 ## 📚 Additional Resources
 
-- [React Native Upgrade Helper](https://react-native-community.github.io/upgrade-helper/)
-- [Google Play Console](https://play.google.com/console)
-- [Android Developer Documentation](https://developer.android.com/docs)
-- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- **Wireless Setup Guide:** [WIRELESS_SETUP_USAGE.md](./WIRELESS_SETUP_USAGE.md)
+- **Project Documentation:** [README.md](./README.md)
+- **Contributing Guide:** [CONTRIBUTING.md](./CONTRIBUTING.md)
+- **React Native Docs:** [reactnative.dev](https://reactnative.dev/)
+- **Android Developer Docs:** [developer.android.com](https://developer.android.com/)
 
 ---
 
-*Last updated: January 2025 for React Native 0.75+* 
+*Your Hydra Sprite app is ready for professional Android development and publishing! 🚀📱* 

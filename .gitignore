@@ -64,6 +64,9 @@ ios/Pods/Flipper-RSocket
 .DS_Store
 *.pem
 
+# Device connection info
+.android-device-ip
+
 # Debug
 npm-debug.*
 yarn-debug.*

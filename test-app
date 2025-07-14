@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# 📱 Hydra Sprite - Super Simple App Testing
+# Just run: ./test-app
+
+echo "🚀 Starting Hydra Sprite quick test..."
+./setup-android-wireless.sh test "$@" 
