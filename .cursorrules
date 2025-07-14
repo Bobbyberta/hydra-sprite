@@ -1,0 +1,108 @@
+# Hydra Sprite - React Native Water Tracking App
+
+## Project Overview
+This is an offline water tracking mobile app built with React Native. Users log water intake to keep a virtual sprite character alive and healthy. The app supports Android and iOS platforms.
+
+## Development Guidelines
+
+### Code Style & Standards
+- Use TypeScript for all new code
+- Follow React Native best practices
+- Use functional components with hooks
+- Implement proper error boundaries
+- Use consistent naming conventions (camelCase for variables, PascalCase for components)
+- Prefer const over let, avoid var
+- Use meaningful variable and function names
+
+### File Structure
+- `/src/components/` - Reusable UI components
+- `/src/screens/` - Screen components
+- `/src/services/` - Business logic and data management
+- `/src/utils/` - Helper functions and utilities
+- `/src/types/` - TypeScript type definitions
+- `/src/assets/` - Images, fonts, and other static assets
+- `/src/store/` - State management (AsyncStorage utilities)
+
+### Mobile-Specific Guidelines
+- Always consider offline functionality first
+- Use AsyncStorage for local data persistence
+- Implement proper loading states and error handling
+- Consider different screen sizes and orientations
+- Use platform-specific code when necessary (Platform.OS)
+- Optimize for performance (use FlatList for large lists, optimize images)
+
+### Water Tracking Features
+- Store water intake data locally using AsyncStorage
+- Implement sprite health system based on hydration levels
+- Create intuitive water logging UI with quick actions
+- Support for different container sizes and measurements
+- Daily/weekly/monthly water intake statistics
+- Sprite animation states based on hydration level
+
+### Sprite Character System
+- Sprite should have different states: healthy, dehydrated, very dehydrated
+- Smooth animations between states
+- Visual feedback when water is logged
+- Character should be the central focus of the main screen
+- Consider using React Native Reanimated for smooth animations
+
+### Home Screen Widget
+- Implement home screen widget functionality for quick water logging
+- Show current sprite state on widget
+- Allow quick water increment from widget
+- Sync widget data with main app
+
+### Code Quality
+- Write unit tests for utility functions
+- Use proper error handling and try-catch blocks
+- Implement proper loading states
+- Add accessibility labels for screen readers
+- Validate user inputs
+- Use proper TypeScript types
+
+### Performance
+- Minimize re-renders with useMemo and useCallback
+- Optimize images and assets
+- Use lazy loading where appropriate
+- Monitor memory usage
+- Test on both debug and release builds
+
+### Dependencies
+- Avoid adding unnecessary dependencies
+- Keep dependencies up to date
+- Use native modules sparingly
+- Prefer pure JavaScript solutions when possible
+
+### Git Workflow
+- Use meaningful commit messages
+- Create feature branches for new functionality
+- Keep commits atomic and focused
+- Write clear pull request descriptions
+
+### Testing
+- Test on both Android and iOS
+- Test offline functionality thoroughly
+- Test with different data states (empty, partial, full)
+- Test edge cases (app backgrounding, device rotation)
+- Performance test with large datasets
+
+### Security & Privacy
+- Store all data locally (offline-first)
+- Don't collect personal data beyond water intake
+- Implement proper data validation
+- Consider data export functionality for user control
+
+### UI/UX Guidelines
+- Follow platform-specific design guidelines (Material Design for Android, Human Interface Guidelines for iOS)
+- Ensure intuitive navigation
+- Use consistent spacing and typography
+- Implement proper feedback for user actions
+- Make water logging as frictionless as possible
+- Sprite should be visually appealing and engaging
+
+### Release Process
+- Test thoroughly on physical devices
+- Optimize for app store requirements
+- Prepare app store assets (screenshots, descriptions)
+- Follow Google Play Store and App Store guidelines
+- Implement proper version management 
