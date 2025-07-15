@@ -13,15 +13,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Design System
 import { Colors, Theme } from './design-system';
-import { Headline1, Headline2, Body1, Body2, Caption } from './design-system/components/Text';
+import { Headline1, Headline2, Body1, Body2, Caption, ButtonText } from './design-system/components/Text';
 import { PrimaryButton, SecondaryButton, OutlineButton } from './design-system/components/Button';
 import { ElevatedCard, FilledCard } from './design-system/components/Card';
+
+// Components
+import SpriteCharacter from './components/Sprite/SpriteCharacter';
 
 const { width, height } = Dimensions.get('window');
 
 const App: React.FC = () => {
   const [waterCount, setWaterCount] = React.useState(0);
-  const [spriteState, setSpriteState] = React.useState('okay');
+  const [spriteState, setSpriteState] = React.useState<'dehydrated' | 'concerned' | 'okay' | 'happy' | 'thriving'>('okay');
 
   // Load water count from storage
   React.useEffect(() => {
@@ -80,22 +83,7 @@ const App: React.FC = () => {
     Alert.alert('Reset', 'Water count reset to 0');
   };
 
-  const getSpriteEmoji = () => {
-    switch (spriteState) {
-      case 'thriving':
-        return '🌟';
-      case 'happy':
-        return '😊';
-      case 'okay':
-        return '😐';
-      case 'concerned':
-        return '😟';
-      case 'dehydrated':
-        return '😵';
-      default:
-        return '😐';
-    }
-  };
+
 
   const getSpriteMessage = () => {
     switch (spriteState) {
@@ -127,46 +115,38 @@ const App: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Headline1 color={Colors.text.primary} align="center">
+        <Headline1 color={Colors.text.primary} align="center" style={styles.mainTitle}>
           💧 Hydra Sprite
         </Headline1>
-        <Body2 color={Colors.text.secondary} align="center" style={styles.subtitle}>
+        <Body2 color={Colors.text.primary} align="center" style={styles.subtitle}>
           Keep your sprite happy and hydrated!
         </Body2>
       </View>
 
       {/* Sprite Container */}
-      <ElevatedCard style={styles.spriteCard}>
-        <View style={styles.spriteContainer}>
-          <View style={styles.spriteEmoji}>
-            <Headline1 style={{ fontSize: 80, textAlign: 'center' }}>
-              {getSpriteEmoji()}
-            </Headline1>
-          </View>
-          
-          <Headline2 
-            color={Colors.text.primary} 
-            align="center"
-            style={styles.spriteMessage}
-          >
-            {getSpriteMessage()}
-          </Headline2>
+      <View style={styles.spriteContainer}>
+        <View style={styles.spriteEmoji}>
+          <SpriteCharacter 
+            hydrationLevel={spriteState} 
+            size={120}
+          />
         </View>
-      </ElevatedCard>
+        
+        <Body2 
+          color={Colors.text.primary} 
+          align="center"
+          style={styles.spriteMessage}
+        >
+          {getSpriteMessage()}
+        </Body2>
+      </View>
 
       {/* Progress Section */}
       <FilledCard style={styles.progressCard}>
-        <Body2 color={Colors.text.secondary} align="center" style={styles.progressLabel}>
-          Daily Progress
-        </Body2>
-        
         <View style={styles.counterContainer}>
-          <Headline1 color={Colors.primary.main} align="center">
-            {waterCount}
-          </Headline1>
-          <Caption color={Colors.text.tertiary} align="center">
-            of 8 glasses
-          </Caption>
+          <Body1 color={Colors.text.primary} align="center">
+            {waterCount} / 8 glasses
+          </Body1>
         </View>
 
         {/* Progress Bar */}
@@ -179,9 +159,6 @@ const App: React.FC = () => {
               ]} 
             />
           </View>
-          <Caption color={Colors.text.tertiary} style={styles.progressText}>
-            {Math.round(getProgressPercentage())}% complete
-          </Caption>
         </View>
       </FilledCard>
 
@@ -189,19 +166,27 @@ const App: React.FC = () => {
       <View style={styles.buttonContainer}>
         <PrimaryButton
           size="large"
-          style={styles.addButton}
+          style={[styles.addButton, styles.whiteButton]}
           onPress={() => addWater(1)}
         >
-          +1 Glass
+          <ButtonText color={Colors.text.primary}>Small Glass</ButtonText>
         </PrimaryButton>
 
-        <SecondaryButton
+        <PrimaryButton
           size="large"
-          style={styles.addButton}
+          style={[styles.addButton, styles.whiteButton]}
           onPress={() => addWater(2)}
         >
-          +2 Glasses
-        </SecondaryButton>
+          <ButtonText color={Colors.text.primary}>Large Glass</ButtonText>
+        </PrimaryButton>
+
+        <PrimaryButton
+          size="large"
+          style={[styles.addButton, styles.whiteButton]}
+          onPress={() => addWater(4)}
+        >
+          <ButtonText color={Colors.text.primary}>Bottle</ButtonText>
+        </PrimaryButton>
       </View>
 
       {/* Reset Button */}
@@ -209,14 +194,15 @@ const App: React.FC = () => {
         <OutlineButton
           size="medium"
           onPress={resetWater}
+          style={styles.resetButton}
         >
-          Reset Day
+          <ButtonText color={Colors.text.primary}>Reset Day</ButtonText>
         </OutlineButton>
       </View>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Caption color={Colors.text.tertiary} align="center">
+        <Caption color={Colors.text.primary} align="center">
           Stay hydrated and watch your sprite thrive! 🌟
         </Caption>
       </View>
@@ -228,30 +214,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
+    paddingTop: Theme.spacing.sm,
   },
   
   header: {
-    paddingVertical: Theme.spacing.xl,
+    paddingVertical: Theme.spacing.md,
     paddingHorizontal: Theme.spacing.lg,
     backgroundColor: Colors.background.primary,
   },
   
   subtitle: {
-    marginTop: Theme.spacing.sm,
+    marginTop: Theme.spacing.xs,
   },
 
-  spriteCard: {
-    marginHorizontal: Theme.spacing.lg,
-    marginVertical: Theme.spacing.md,
+  mainTitle: {
+    fontFamily: 'Comfortaa-Bold',
+    fontWeight: '700',
   },
 
   spriteContainer: {
     alignItems: 'center',
-    paddingVertical: Theme.spacing.xl,
+    justifyContent: 'center',
+    paddingVertical: Theme.spacing.xxl,
+    paddingHorizontal: Theme.spacing.lg,
+    minHeight: 250,
+    marginTop: Theme.spacing.md,
   },
 
   spriteEmoji: {
-    marginBottom: Theme.spacing.lg,
+    marginBottom: Theme.spacing.sm,
   },
 
   spriteMessage: {
@@ -261,16 +252,12 @@ const styles = StyleSheet.create({
 
   progressCard: {
     marginHorizontal: Theme.spacing.lg,
-    marginBottom: Theme.spacing.lg,
-  },
-
-  progressLabel: {
     marginBottom: Theme.spacing.md,
   },
 
   counterContainer: {
     alignItems: 'center',
-    marginBottom: Theme.spacing.lg,
+    marginBottom: Theme.spacing.sm,
   },
 
   progressBarContainer: {
@@ -278,12 +265,11 @@ const styles = StyleSheet.create({
   },
 
   progressBar: {
-    height: 12,
-    backgroundColor: Colors.utility.border,
+    height: 8,
+    backgroundColor: Colors.background.surface,
     borderRadius: Theme.borderRadius.sm,
     width: '100%',
     overflow: 'hidden',
-    marginBottom: Theme.spacing.sm,
   },
 
   progressFill: {
@@ -292,31 +278,38 @@ const styles = StyleSheet.create({
     borderRadius: Theme.borderRadius.sm,
   },
 
-  progressText: {
-    marginTop: Theme.spacing.xs,
-  },
-
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: Theme.spacing.lg,
-    marginBottom: Theme.spacing.md,
+    marginBottom: Theme.spacing.sm,
   },
 
   addButton: {
     flex: 1,
     marginHorizontal: Theme.spacing.xs,
+    minWidth: 80,
+    paddingHorizontal: Theme.spacing.xs,
+    paddingVertical: Theme.spacing.md,
   },
 
   resetContainer: {
     alignItems: 'center',
-    marginBottom: Theme.spacing.lg,
+    marginBottom: Theme.spacing.sm,
+  },
+
+  resetButton: {
+    backgroundColor: Colors.background.surface,
+    borderColor: Colors.background.surface,
+  },
+
+  whiteButton: {
+    backgroundColor: Colors.background.surface,
   },
 
   footer: {
-    flex: 1,
     justifyContent: 'flex-end',
-    paddingBottom: Theme.spacing.xl,
+    paddingBottom: Theme.spacing.md,
     paddingHorizontal: Theme.spacing.lg,
   },
 });
