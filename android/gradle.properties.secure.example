@@ -1,0 +1,9 @@
+# SECURE GRADLE PROPERTIES EXAMPLE
+# Copy this file to gradle.properties.secure and fill in your actual values
+# This file is safe to commit to Git as it contains no real passwords
+
+# Release signing configuration - REPLACE WITH YOUR ACTUAL VALUES
+MYAPP_RELEASE_STORE_FILE=hydra-sprite-release.keystore
+MYAPP_RELEASE_KEY_ALIAS=hydra-sprite
+MYAPP_RELEASE_STORE_PASSWORD=YOUR_ACTUAL_STORE_PASSWORD_HERE
+MYAPP_RELEASE_KEY_PASSWORD=YOUR_ACTUAL_KEY_PASSWORD_HERE 

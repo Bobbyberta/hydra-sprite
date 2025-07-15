@@ -6,21 +6,21 @@ This guide walks you through preparing Hydra Sprite for Google Play Store releas
 ## Pre-Release Checklist
 
 ### ✅ **Technical Requirements**
-- [ ] Production signing keystore created
-- [ ] App bundle (AAB) generated
+- [x] Production signing keystore created
+- [x] App bundle (AAB) generated
 - [ ] Release build tested thoroughly
 - [ ] Performance optimized
 - [ ] Permissions minimized
-- [ ] Privacy policy created
+- [x] Privacy policy created
 - [ ] App icon and assets ready
 
 ### ✅ **Google Play Console Setup**
-- [ ] Developer account created ($25 one-time fee)
-- [ ] App listing created
+- [x] Developer account created ($25 one-time fee)
+- [x] App listing created
 - [ ] Store assets uploaded
-- [ ] Content rating completed
-- [ ] Data safety form filled
-- [ ] Target audience selected
+- [x] Content rating completed
+- [x] Data safety form filled
+- [x] Target audience selected
 
 ## Step 1: Generate Production Signing Key
 
@@ -38,19 +38,45 @@ keytool -genkey -v -keystore hydra-sprite-release.keystore -alias hydra-sprite -
 # - Your name and organization details
 ```
 
-### Configure Gradle for Release
-Create `android/gradle.properties` (if not exists):
-```properties
-# Add these lines (replace with your actual passwords)
-MYAPP_RELEASE_STORE_FILE=hydra-sprite-release.keystore
-MYAPP_RELEASE_KEY_ALIAS=hydra-sprite
-MYAPP_RELEASE_STORE_PASSWORD=your_keystore_password
-MYAPP_RELEASE_KEY_PASSWORD=your_key_password
+### Configure Secure Properties
+The project uses a secure properties file to keep passwords out of Git. Set up your signing configuration:
+
+```bash
+# Run the setup script
+./setup-secure-properties.sh
+
+# Edit the secure properties file with your actual passwords
+nano android/gradle.properties.secure
 ```
 
+The `android/gradle.properties.secure` file should contain:
+```properties
+# Release signing configuration - REPLACE WITH YOUR ACTUAL VALUES
+MYAPP_RELEASE_STORE_FILE=hydra-sprite-release.keystore
+MYAPP_RELEASE_KEY_ALIAS=hydra-sprite
+MYAPP_RELEASE_STORE_PASSWORD=your_actual_keystore_password
+MYAPP_RELEASE_KEY_PASSWORD=your_actual_key_password
+```
+
+**Important**: 
+- The `gradle.properties.secure` file is excluded from Git
+- Never commit your actual passwords to version control
+- Keep a secure backup of your keystore and passwords
+
+### Automatic Configuration
+The build system automatically loads secure properties from `android/gradle.properties.secure`. The main `gradle.properties` file contains no sensitive information and is safe to commit to Git.
+
 ### Update build.gradle
-Edit `android/app/build.gradle`:
+The `android/app/build.gradle` file is already configured to use secure properties. The signing configuration automatically loads from `android/gradle.properties.secure`:
+
 ```gradle
+// Load secure properties if the file exists
+def securePropertiesFile = rootProject.file("gradle.properties.secure")
+def secureProperties = new Properties()
+if (securePropertiesFile.exists()) {
+    secureProperties.load(new FileInputStream(securePropertiesFile))
+}
+
 android {
     ...
     signingConfigs {
@@ -61,11 +87,11 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
-                storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword MYAPP_RELEASE_STORE_PASSWORD
-                keyAlias MYAPP_RELEASE_KEY_ALIAS
-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            if (secureProperties.containsKey('MYAPP_RELEASE_STORE_FILE')) {
+                storeFile file(secureProperties['MYAPP_RELEASE_STORE_FILE'])
+                storePassword secureProperties['MYAPP_RELEASE_STORE_PASSWORD']
+                keyAlias secureProperties['MYAPP_RELEASE_KEY_ALIAS']
+                keyPassword secureProperties['MYAPP_RELEASE_KEY_PASSWORD']
             }
         }
     }
@@ -81,6 +107,8 @@ android {
     }
 }
 ```
+
+**No manual configuration needed** - the build system automatically handles secure properties loading.
 
 ## Step 2: Update App Information
 
@@ -105,39 +133,59 @@ defaultConfig {
 
 ### Build App Bundle (AAB)
 ```bash
-# Clean previous builds
-cd android && ./gradlew clean && cd ..
+# Use the automated release script (recommended)
+./release-android.sh aab
 
-# Generate release AAB (recommended for Play Store)
+# Or manually:
 cd android && ./gradlew bundleRelease && cd ..
-
-# AAB file will be at:
-# android/app/build/outputs/bundle/release/app-release.aab
 ```
 
 ### Alternative: Build APK
 ```bash
-# Generate release APK
-cd android && ./gradlew assembleRelease && cd ..
+# Use the automated release script
+./release-android.sh apk
 
-# APK file will be at:
-# android/app/build/outputs/apk/release/app-release.apk
+# Or manually:
+cd android && ./gradlew assembleRelease && cd ..
 ```
+
+### Full Release Build
+```bash
+# Build both AAB and APK with full automation
+./release-android.sh all
+```
+
+The release script automatically:
+- Checks for secure properties configuration
+- Verifies keystore exists
+- Cleans previous builds
+- Generates both AAB and APK
+- Shows build summary
+
+**Build artifacts will be at:**
+- AAB: `android/app/build/outputs/bundle/release/app-release.aab`
+- APK: `android/app/build/outputs/apk/release/app-release.apk`
 
 ## Step 4: Test Release Build
 
 ### Install and Test
 ```bash
-# Install release APK on device
-adb install android/app/build/outputs/apk/release/app-release.apk
+# Use the automated test script
+./release-android.sh test
 
-# Test thoroughly:
-# - All app functionality
-# - Performance
-# - Offline capabilities
-# - Different screen sizes
-# - App lifecycle (background/foreground)
+# Or manually install APK on device
+adb install android/app/build/outputs/apk/release/app-release.apk
 ```
+
+### Test Thoroughly
+- [ ] All app functionality works
+- [ ] Performance is acceptable
+- [ ] Offline capabilities work
+- [ ] Different screen sizes display correctly
+- [ ] App lifecycle (background/foreground) works
+- [ ] No crashes or errors
+- [ ] Sprite animations work properly
+- [ ] Water logging functions correctly
 
 ## Step 5: Create Google Play Console Account
 

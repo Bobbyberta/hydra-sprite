@@ -47,11 +47,15 @@ update_cursorrules() {
     fi
 }
 
-# Check if gradle.properties exists
-check_gradle_properties() {
-    if [ ! -f "android/gradle.properties" ]; then
-        print_error "gradle.properties not found!"
-        print_info "Create android/gradle.properties with your signing configuration:"
+# Check if secure properties are configured
+check_secure_properties() {
+    if [ ! -f "android/gradle.properties.secure" ]; then
+        print_error "Secure properties not configured!"
+        print_info "Run the setup script to configure secure properties:"
+        echo ""
+        echo "./setup-secure-properties.sh"
+        echo ""
+        print_info "Or manually create android/gradle.properties.secure with your signing configuration:"
         echo ""
         echo "MYAPP_RELEASE_STORE_FILE=hydra-sprite-release.keystore"
         echo "MYAPP_RELEASE_KEY_ALIAS=hydra-sprite"
@@ -65,7 +69,13 @@ check_gradle_properties() {
 
 # Check if keystore exists
 check_keystore() {
-    local keystore_file=$(grep "MYAPP_RELEASE_STORE_FILE=" android/gradle.properties | cut -d'=' -f2)
+    local keystore_file
+    if [ -f "android/gradle.properties.secure" ]; then
+        keystore_file=$(grep "MYAPP_RELEASE_STORE_FILE=" android/gradle.properties.secure | cut -d'=' -f2)
+    else
+        keystore_file=$(grep "MYAPP_RELEASE_STORE_FILE=" android/gradle.properties | cut -d'=' -f2)
+    fi
+    
     if [ ! -f "android/app/$keystore_file" ]; then
         print_error "Release keystore not found: android/app/$keystore_file"
         print_info "Generate a keystore first:"
@@ -217,12 +227,12 @@ main() {
             clean_builds
             ;;
         "aab")
-            check_gradle_properties
+            check_secure_properties
             check_keystore
             build_aab
             ;;
         "apk")
-            check_gradle_properties
+            check_secure_properties
             check_keystore
             build_apk
             ;;
@@ -230,7 +240,7 @@ main() {
             test_release
             ;;
         "all")
-            check_gradle_properties
+            check_secure_properties
             check_keystore
             clean_builds
             build_aab

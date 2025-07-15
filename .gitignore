@@ -37,7 +37,7 @@ local.properties
 # Release signing keys and passwords
 android/app/*.keystore
 android/app/hydra-sprite-release.keystore
-android/gradle.properties
+android/gradle.properties.secure
 release-passwords.txt
 keystore-backup/
 

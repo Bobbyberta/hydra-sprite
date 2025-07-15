@@ -199,10 +199,37 @@ npm run ios
 - **Secure Local Storage**: Uses platform-standard secure storage
 - **No Permissions**: Minimal app permissions required
 
-### Development Security
-- **IP Privacy**: Device IP addresses excluded from version control
-- **Secure Builds**: Production signing keys kept secure
-- **No Hardcoded Secrets**: No API keys or sensitive data in source
+## 🔐 Secure Properties Setup
+
+This project uses secure properties to keep sensitive information (like keystore passwords) out of Git. 
+
+### Initial Setup
+```bash
+# Run the setup script to configure secure properties
+./setup-secure-properties.sh
+
+# Edit the secure properties file with your actual passwords
+nano android/gradle.properties.secure
+```
+
+### What's Protected
+- **Keystore passwords** - Stored in `android/gradle.properties.secure`
+- **Release keystore** - Stored in `android/app/hydra-sprite-release.keystore`
+- **Device IP** - Stored in `.android-device-ip`
+
+### Security Files
+- `android/gradle.properties.secure` - Contains actual passwords (excluded from Git)
+- `android/gradle.properties.secure.example` - Template file (safe to commit)
+- `.android-device-ip` - Your device's IP address (excluded from Git)
+- `.android-device-ip.example` - Template for device IP (safe to commit)
+
+### Build Process
+The build system automatically:
+1. Loads secure properties from `gradle.properties.secure`
+2. Uses them for release signing
+3. Falls back to project properties if secure file doesn't exist
+
+**Never commit actual passwords to Git!** The secure files are already excluded in `.gitignore`. 
 
 ## 🤝 Contributing
 
