@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Dimensions,
+  Animated,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,11 +26,37 @@ const { width, height } = Dimensions.get('window');
 const App: React.FC = () => {
   const [waterCount, setWaterCount] = React.useState(0);
   const [spriteState, setSpriteState] = React.useState<'dehydrated' | 'concerned' | 'okay' | 'happy' | 'thriving'>('okay');
+  const [showPopup, setShowPopup] = React.useState(false);
+  const [popupText, setPopupText] = React.useState('');
+  const popupAnimation = React.useRef(new Animated.Value(0)).current;
+  const spriteFloatAnimation = React.useRef(new Animated.Value(0)).current;
 
   // Load water count from storage
   React.useEffect(() => {
     loadWaterCount();
   }, []);
+
+  // Sprite floating animation
+  React.useEffect(() => {
+    const floatAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(spriteFloatAnimation, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(spriteFloatAnimation, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    
+    floatAnimation.start();
+    
+    return () => floatAnimation.stop();
+  }, [spriteFloatAnimation]);
 
   const loadWaterCount = async () => {
     try {
@@ -72,8 +99,34 @@ const App: React.FC = () => {
     updateSpriteState(newCount);
     await saveWaterCount(newCount);
     
-    // Show positive feedback
-    Alert.alert('Great!', `Added ${amount} glass${amount > 1 ? 'es' : ''} of water! 💧`);
+    // Show popup animation
+    showWaterPopup(amount);
+  };
+
+  const showWaterPopup = (amount: number) => {
+    const text = `+${amount} 🥤`;
+    setPopupText(text);
+    setShowPopup(true);
+    
+    // Reset animation
+    popupAnimation.setValue(0);
+    
+    // Animate in
+    Animated.sequence([
+      Animated.timing(popupAnimation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.delay(800),
+      Animated.timing(popupAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowPopup(false);
+    });
   };
 
   const resetWater = async () => {
@@ -85,22 +138,7 @@ const App: React.FC = () => {
 
 
 
-  const getSpriteMessage = () => {
-    switch (spriteState) {
-      case 'thriving':
-        return 'Excellent hydration! Keep it up!';
-      case 'happy':
-        return 'Great hydration! Feeling good!';
-      case 'okay':
-        return 'Adequate hydration. Could drink more!';
-      case 'concerned':
-        return 'Low hydration. Please drink more water!';
-      case 'dehydrated':
-        return 'Very dehydrated! Drink water now!';
-      default:
-        return 'How are you feeling?';
-    }
-  };
+
 
   const getProgressPercentage = () => {
     return Math.min((waterCount / 8) * 100, 100);
@@ -125,20 +163,58 @@ const App: React.FC = () => {
 
       {/* Sprite Container */}
       <View style={styles.spriteContainer}>
-        <View style={styles.spriteEmoji}>
+        <Animated.View 
+          style={[
+            styles.spriteEmoji,
+            {
+              transform: [
+                {
+                  translateY: spriteFloatAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -8],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           <SpriteCharacter 
             hydrationLevel={spriteState} 
-            size={120}
+            size={200}
           />
-        </View>
+          
+          {/* Water Popup Animation */}
+          {showPopup && (
+            <Animated.View
+              style={[
+                styles.waterPopup,
+                {
+                  opacity: popupAnimation,
+                  transform: [
+                    {
+                      translateY: popupAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, -30],
+                      }),
+                    },
+                    {
+                      scale: popupAnimation.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0.5, 1.2, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <Body1 color={Colors.primary.main} style={styles.popupText}>
+                {popupText}
+              </Body1>
+            </Animated.View>
+          )}
+        </Animated.View>
         
-        <Body2 
-          color={Colors.text.primary} 
-          align="center"
-          style={styles.spriteMessage}
-        >
-          {getSpriteMessage()}
-        </Body2>
+
       </View>
 
       {/* Progress Section */}
@@ -245,10 +321,7 @@ const styles = StyleSheet.create({
     marginBottom: Theme.spacing.sm,
   },
 
-  spriteMessage: {
-    textAlign: 'center',
-    paddingHorizontal: Theme.spacing.md,
-  },
+
 
   progressCard: {
     marginHorizontal: Theme.spacing.lg,
@@ -305,6 +378,26 @@ const styles = StyleSheet.create({
 
   whiteButton: {
     backgroundColor: Colors.background.surface,
+  },
+
+  waterPopup: {
+    position: 'absolute',
+    top: -20,
+    right: -10,
+    backgroundColor: Colors.background.surface,
+    borderRadius: Theme.borderRadius.md,
+    paddingHorizontal: Theme.spacing.sm,
+    paddingVertical: Theme.spacing.xs,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  popupText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 
   footer: {
