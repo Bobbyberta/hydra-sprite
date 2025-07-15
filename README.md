@@ -301,3 +301,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 *Made with ❤️ for healthier hydration habits*
 
 </div> 
+## 🎨 Design System
+
+Hydra Sprite features a beautiful, ocean-inspired design system with a cohesive color palette and typography that creates a calming, refreshing user experience.
+
+### Color Palette
+- **Mystic Dewdrop** (#6EE3FF) - Primary accent for water-related actions
+- **Coral Glimmer** (#FFB3DA) - Secondary accent for positive feedback
+- **Lagoon Whisper** (#E0F7FA) - Main background color
+- **Seafoam Dream** (#B2EBF2) - Secondary background for cards
+- **Abyssal Ink** (#263238) - Primary text color
+
+### Typography
+- **Headlines**: Comfortaa font for emotional connection and display text
+- **Body Text**: Inter font for clarity and excellent readability
+- **Scale**: 7 carefully chosen sizes from 12sp to 34sp
+
+### Components
+The app uses a comprehensive design system with reusable components:
+- Styled text components (Headline1, Body1, etc.)
+- Button variants (Primary, Secondary, Outline)
+- Card components (Elevated, Outlined, Filled)
+- Consistent spacing and shadows
+
+See `DESIGN_SYSTEM_GUIDE.md` for complete documentation.

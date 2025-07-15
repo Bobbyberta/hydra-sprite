@@ -5,11 +5,19 @@ import {
   StyleSheet,
   Platform,
   View,
-  Text,
   TouchableOpacity,
   Alert,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Design System
+import { Colors, Theme } from './design-system';
+import { Headline1, Headline2, Body1, Body2, Caption } from './design-system/components/Text';
+import { PrimaryButton, SecondaryButton, OutlineButton } from './design-system/components/Button';
+import { ElevatedCard, FilledCard } from './design-system/components/Card';
+
+const { width, height } = Dimensions.get('window');
 
 const App: React.FC = () => {
   const [waterCount, setWaterCount] = React.useState(0);
@@ -106,56 +114,111 @@ const App: React.FC = () => {
     }
   };
 
+  const getProgressPercentage = () => {
+    return Math.min((waterCount / 8) * 100, 100);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
-        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'}
-        backgroundColor="#2196F3"
+        barStyle="dark-content"
+        backgroundColor={Colors.background.primary}
       />
       
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>💧 Hydra Sprite</Text>
-        <Text style={styles.subtitle}>Keep your sprite happy and hydrated!</Text>
+        <Headline1 color={Colors.text.primary} align="center">
+          💧 Hydra Sprite
+        </Headline1>
+        <Body2 color={Colors.text.secondary} align="center" style={styles.subtitle}>
+          Keep your sprite happy and hydrated!
+        </Body2>
       </View>
 
-      <View style={styles.spriteContainer}>
-        <Text style={styles.spriteEmoji}>{getSpriteEmoji()}</Text>
-        <Text style={styles.spriteMessage}>{getSpriteMessage()}</Text>
-      </View>
+      {/* Sprite Container */}
+      <ElevatedCard style={styles.spriteCard}>
+        <View style={styles.spriteContainer}>
+          <View style={styles.spriteEmoji}>
+            <Headline1 style={{ fontSize: 80, textAlign: 'center' }}>
+              {getSpriteEmoji()}
+            </Headline1>
+          </View>
+          
+          <Headline2 
+            color={Colors.text.primary} 
+            align="center"
+            style={styles.spriteMessage}
+          >
+            {getSpriteMessage()}
+          </Headline2>
+        </View>
+      </ElevatedCard>
 
-      <View style={styles.counterContainer}>
-        <Text style={styles.counterLabel}>Water Glasses Today</Text>
-        <Text style={styles.counterValue}>{waterCount}</Text>
-        <Text style={styles.goal}>Goal: 8 glasses</Text>
-      </View>
+      {/* Progress Section */}
+      <FilledCard style={styles.progressCard}>
+        <Body2 color={Colors.text.secondary} align="center" style={styles.progressLabel}>
+          Daily Progress
+        </Body2>
+        
+        <View style={styles.counterContainer}>
+          <Headline1 color={Colors.primary.main} align="center">
+            {waterCount}
+          </Headline1>
+          <Caption color={Colors.text.tertiary} align="center">
+            of 8 glasses
+          </Caption>
+        </View>
 
+        {/* Progress Bar */}
+        <View style={styles.progressBarContainer}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill,
+                { width: `${getProgressPercentage()}%` }
+              ]} 
+            />
+          </View>
+          <Caption color={Colors.text.tertiary} style={styles.progressText}>
+            {Math.round(getProgressPercentage())}% complete
+          </Caption>
+        </View>
+      </FilledCard>
+
+      {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.addButton]}
+        <PrimaryButton
+          size="large"
+          style={styles.addButton}
           onPress={() => addWater(1)}
         >
-          <Text style={styles.buttonText}>+1 Glass</Text>
-        </TouchableOpacity>
+          +1 Glass
+        </PrimaryButton>
 
-        <TouchableOpacity
-          style={[styles.button, styles.addButton]}
+        <SecondaryButton
+          size="large"
+          style={styles.addButton}
           onPress={() => addWater(2)}
         >
-          <Text style={styles.buttonText}>+2 Glasses</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.resetButton]}
-          onPress={resetWater}
-        >
-          <Text style={styles.buttonText}>Reset</Text>
-        </TouchableOpacity>
+          +2 Glasses
+        </SecondaryButton>
       </View>
 
+      {/* Reset Button */}
+      <View style={styles.resetContainer}>
+        <OutlineButton
+          size="medium"
+          onPress={resetWater}
+        >
+          Reset Day
+        </OutlineButton>
+      </View>
+
+      {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>
+        <Caption color={Colors.text.tertiary} align="center">
           Stay hydrated and watch your sprite thrive! 🌟
-        </Text>
+        </Caption>
       </View>
     </SafeAreaView>
   );
@@ -164,104 +227,98 @@ const App: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.background.primary,
   },
+  
   header: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    backgroundColor: '#2196F3',
+    paddingVertical: Theme.spacing.xl,
+    paddingHorizontal: Theme.spacing.lg,
+    backgroundColor: Colors.background.primary,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 5,
-  },
+  
   subtitle: {
-    fontSize: 16,
-    color: '#fff',
-    opacity: 0.9,
+    marginTop: Theme.spacing.sm,
   },
+
+  spriteCard: {
+    marginHorizontal: Theme.spacing.lg,
+    marginVertical: Theme.spacing.md,
+  },
+
   spriteContainer: {
     alignItems: 'center',
-    paddingVertical: 40,
-    backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginVertical: 20,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingVertical: Theme.spacing.xl,
   },
+
   spriteEmoji: {
-    fontSize: 80,
-    marginBottom: 15,
+    marginBottom: Theme.spacing.lg,
   },
+
   spriteMessage: {
-    fontSize: 18,
     textAlign: 'center',
-    color: '#333',
-    fontWeight: '500',
+    paddingHorizontal: Theme.spacing.md,
   },
+
+  progressCard: {
+    marginHorizontal: Theme.spacing.lg,
+    marginBottom: Theme.spacing.lg,
+  },
+
+  progressLabel: {
+    marginBottom: Theme.spacing.md,
+  },
+
   counterContainer: {
     alignItems: 'center',
-    paddingVertical: 20,
+    marginBottom: Theme.spacing.lg,
   },
-  counterLabel: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 10,
-  },
-  counterValue: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#2196F3',
-    marginBottom: 5,
-  },
-  goal: {
-    fontSize: 14,
-    color: '#999',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  button: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderRadius: 10,
-    minWidth: 100,
+
+  progressBarContainer: {
     alignItems: 'center',
   },
+
+  progressBar: {
+    height: 12,
+    backgroundColor: Colors.utility.border,
+    borderRadius: Theme.borderRadius.sm,
+    width: '100%',
+    overflow: 'hidden',
+    marginBottom: Theme.spacing.sm,
+  },
+
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary.main,
+    borderRadius: Theme.borderRadius.sm,
+  },
+
+  progressText: {
+    marginTop: Theme.spacing.xs,
+  },
+
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: Theme.spacing.lg,
+    marginBottom: Theme.spacing.md,
+  },
+
   addButton: {
-    backgroundColor: '#4CAF50',
+    flex: 1,
+    marginHorizontal: Theme.spacing.xs,
   },
-  resetButton: {
-    backgroundColor: '#f44336',
+
+  resetContainer: {
+    alignItems: 'center',
+    marginBottom: Theme.spacing.lg,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+
   footer: {
     flex: 1,
     justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 30,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    paddingBottom: Theme.spacing.xl,
+    paddingHorizontal: Theme.spacing.lg,
   },
 });
 
-export default App; 
+export default App;
